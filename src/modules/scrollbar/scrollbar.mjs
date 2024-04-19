@@ -262,6 +262,7 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
       el = swiperEl.querySelector(params.el);
     }
     if (el.length > 0) el = el[0];
+    else el = undefined;
 
     el.classList.add(swiper.isHorizontal() ? params.horizontalClass : params.verticalClass);
 
