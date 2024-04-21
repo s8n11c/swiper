@@ -58,14 +58,17 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
     } else if (newPos + dragSize > trackSize) {
       newSize = trackSize - newPos;
     }
-    if (swiper.isHorizontal()) {
-      dragEl.style.transform = `translate3d(${newPos}px, 0, 0)`;
-      dragEl.style.width = `${newSize}px`;
-    } else {
-      dragEl.style.transform = `translate3d(0px, ${newPos}px, 0)`;
-      dragEl.style.height = `${newSize}px`;
+
+    if(dragEl && dragEl.style) {
+      if (swiper.isHorizontal() && dragEl.style) {
+        dragEl.style.transform = `translate3d(${newPos}px, 0, 0)`;
+        dragEl.style.width = `${newSize}px`;
+      } else {
+        dragEl.style.transform = `translate3d(0px, ${newPos}px, 0)`;
+        dragEl.style.height = `${newSize}px`;
+      }
     }
-    if (params.hide) {
+    if (params.hide  && el.style) {
       clearTimeout(timeout);
       el.style.opacity = 1;
       timeout = setTimeout(() => {
@@ -76,7 +79,9 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
   }
   function setTransition(duration) {
     if (!swiper.params.scrollbar.el || !swiper.scrollbar.el) return;
-    swiper.scrollbar.dragEl.style.transitionDuration = `${duration}ms`;
+
+    if(swiper.scrollbar.dragEl && swiper.scrollbar.dragEl.style)
+      swiper.scrollbar.dragEl.style.transitionDuration = `${duration}ms`;
   }
   function updateSize() {
     if (!swiper.params.scrollbar.el || !swiper.scrollbar.el) return;
@@ -84,8 +89,11 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
     const { scrollbar } = swiper;
     const { dragEl, el } = scrollbar;
 
-    dragEl.style.width = '';
-    dragEl.style.height = '';
+    if(dragEl?.style) {
+      dragEl.style.width = '';
+      dragEl.style.height = '';
+    }
+
     trackSize = swiper.isHorizontal() ? el.offsetWidth : el.offsetHeight;
 
     divider =
@@ -99,22 +107,22 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
       dragSize = parseInt(swiper.params.scrollbar.dragSize, 10);
     }
 
-    if (swiper.isHorizontal()) {
+    if (swiper.isHorizontal() && dragEl?.style) {
       dragEl.style.width = `${dragSize}px`;
     } else {
       dragEl.style.height = `${dragSize}px`;
     }
 
-    if (divider >= 1) {
+    if (divider >= 1 && el?.style) {
       el.style.display = 'none';
     } else {
       el.style.display = '';
     }
-    if (swiper.params.scrollbar.hide) {
+    if (swiper.params.scrollbar.hide && el?.style) {
       el.style.opacity = 0;
     }
 
-    if (swiper.params.watchOverflow && swiper.enabled) {
+    if (swiper.params.watchOverflow && swiper.enabled && scrollbar?.el?.classList) {
       scrollbar.el.classList[swiper.isLocked ? 'add' : 'remove'](swiper.params.scrollbar.lockClass);
     }
   }
@@ -164,7 +172,7 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
     clearTimeout(dragTimeout);
 
     el.style.transitionDuration = '0ms';
-    if (params.hide) {
+    if (params.hide && el?.style) {
       el.style.opacity = 1;
     }
     if (swiper.params.cssMode) {
@@ -218,7 +226,8 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
     const passiveListener = params.passiveListeners ? { passive: true, capture: false } : false;
     if (!target) return;
     const eventMethod = method === 'on' ? 'addEventListener' : 'removeEventListener';
-    target[eventMethod]('pointerdown', onDragStart, activeListener);
+    if(target[eventMethod])
+      target[eventMethod]('pointerdown', onDragStart, activeListener);
     document[eventMethod]('pointermove', onDragMove, activeListener);
     document[eventMethod]('pointerup', onDragEnd, passiveListener);
   }
@@ -262,17 +271,18 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
       el = swiperEl.querySelector(params.el);
     }
     if (el.length > 0) el = el[0];
-    else el = undefined;
 
-    el.classList.add(swiper.isHorizontal() ? params.horizontalClass : params.verticalClass);
+    if(el?.classList)
+      el.classList.add(swiper.isHorizontal() ? params.horizontalClass : params.verticalClass);
 
     let dragEl;
-    if (el) {
+    if (el.querySelector) {
       dragEl = el.querySelector(classesToSelector(swiper.params.scrollbar.dragClass));
-      if (!dragEl) {
+    }
+
+      if (!dragEl && el?.append) {
         dragEl = createElement('div', swiper.params.scrollbar.dragClass);
         el.append(dragEl);
-      }
     }
 
     Object.assign(scrollbar, {
@@ -284,7 +294,7 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
       enableDraggable();
     }
 
-    if (el) {
+    if (el.classList) {
       el.classList[swiper.enabled ? 'remove' : 'add'](
         ...classesToTokens(swiper.params.scrollbar.lockClass),
       );
@@ -293,7 +303,7 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
   function destroy() {
     const params = swiper.params.scrollbar;
     const el = swiper.scrollbar.el;
-    if (el) {
+    if (el?.classList) {
       el.classList.remove(
         ...classesToTokens(swiper.isHorizontal() ? params.horizontalClass : params.verticalClass),
       );
@@ -334,7 +344,7 @@ export default function Scrollbar({ swiper, extendParams, on, emit }) {
   });
   on('enable disable', () => {
     const { el } = swiper.scrollbar;
-    if (el) {
+    if (el.classList) {
       el.classList[swiper.enabled ? 'remove' : 'add'](
         ...classesToTokens(swiper.params.scrollbar.lockClass),
       );
